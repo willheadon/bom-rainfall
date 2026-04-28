@@ -22,7 +22,7 @@ jobs:
         run: pip install requests beautifulsoup4 pandas
 
       - name: Run script
-        run: python bom.py
+        run: python Update bom.py
 
       - name: Commit output
         run: |
