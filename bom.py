@@ -8,6 +8,13 @@ html = requests.get(url).text
 soup = BeautifulSoup(html, "html.parser")
 
 tables = soup.find_all("table")
+
+print("Number of tables found:", len(tables))
+
+# safety check
+if len(tables) <= 19:
+    raise Exception("Table index 19 not found - BOM page structure changed")
+
 table = tables[19]
 
 rows = []
