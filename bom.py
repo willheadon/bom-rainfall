@@ -32,11 +32,14 @@ for tr in table.find_all("tr"):
 print("Rows extracted:", len(rows))
 
 df = pd.DataFrame(rows)
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
-now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# NSW fixed time (ignore daylight savings as requested)
+nsw_offset = timezone(timedelta(hours=10))
 
-df["LastUpdated"] = now
+now_nsw = datetime.now(timezone.utc).astimezone(nsw_offset)
+
+df["LastUpdated_NSW"] = now_nsw.strftime("%Y-%m-%d %H:%M:%S")
 # tidy for Power BI
 df = df.dropna(axis=1, how='all')
 
