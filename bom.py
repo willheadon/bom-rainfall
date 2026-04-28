@@ -32,7 +32,11 @@ for tr in table.find_all("tr"):
 print("Rows extracted:", len(rows))
 
 df = pd.DataFrame(rows)
+from datetime import datetime
 
+now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+df["LastUpdated"] = now
 # tidy for Power BI
 df = df.dropna(axis=1, how='all')
 
