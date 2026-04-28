@@ -5,7 +5,12 @@ print("START BOM TEST")
 
 url = "http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60169.html"
 
-r = requests.get(url, timeout=30)
+# make request look like a real browser
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+r = requests.get(url, headers=headers, timeout=30)
 
 print("HTTP status:", r.status_code)
 print("HTML size:", len(r.text))
@@ -16,13 +21,12 @@ tables = soup.find_all("table")
 
 print("Total tables found:", len(tables))
 
-# safety check for your chosen index
+# keep your table 19 approach
 if len(tables) <= 19:
     print("TABLE 19 NOT AVAILABLE")
-    print("Stopping safely")
     exit()
 
-print("TABLE 19 EXISTS - extracting...")
+print("TABLE 19 EXISTS")
 
 table = tables[19]
 
@@ -34,10 +38,5 @@ for tr in table.find_all("tr"):
         rows.append(cols)
 
 print("Rows extracted:", len(rows))
-
-# show a small preview (no file output yet)
-print("\n--- SAMPLE ROWS ---")
-for r in rows[:5]:
-    print(r)
 
 print("END SUCCESS")
