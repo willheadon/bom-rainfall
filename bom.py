@@ -1,24 +1,31 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 url = "http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60169.html"
 
-print("Fetching BOM page...")
-
-r = requests.get(url, timeout=30)
-
-print("Status code:", r.status_code)
-print("Final URL:", r.url)
-print("HTML length:", len(r.text))
-
-soup = BeautifulSoup(r.text, "html.parser")
+html = requests.get(url).text
+soup = BeautifulSoup(html, "html.parser")
 
 tables = soup.find_all("table")
+table = tables[19]
 
-print("Tables found:", len(tables))
+rows = []
 
-# print first few table sizes (important)
-for i, t in enumerate(tables[:10]):
-    print(f"Table {i} rows:", len(t.find_all('tr')))
+for tr in table.find_all("tr"):
+    cols = [td.get_text(strip=True) for td in tr.find_all("td")]
+    
+    # skip empty rows
+    if not cols:
+        continue
 
-print("DONE")
+    rows.append(cols)
+
+df = pd.DataFrame(rows)
+
+# remove completely empty columns (important for Power BI)
+df = df.dropna(axis=1, how='all')
+
+df.to_csv("bom_rainfall.csv", index=False)
+
+print("CSV written successfully")
