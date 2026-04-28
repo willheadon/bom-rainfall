@@ -3,7 +3,8 @@ name: BOM Rainfall Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 * * *'   # daily (UTC)
+   - cron: '0 0 * * *'   # ~11am NSW
+   - cron: '0 5 * * *'   # ~4pm NSW
 
 permissions:
   contents: write
