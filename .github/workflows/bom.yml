@@ -3,13 +3,15 @@ name: BOM Rainfall Update
 on:
   workflow_dispatch:
   schedule:
+   # ~4:00 AM NSW time (overnight refresh)
+    - cron: '0 16 * * *'
   # ~11:00 AM NSW time (morning refresh)
     - cron: '0 0 * * *'
 
     # ~2:00 PM NSW time (midday stability refresh)
     - cron: '0 3 * * *'
 
-    # ~4:00 PM NSW time (afternoon refresh / final daily update)
+    # ~4:00 PM NSW time (afternoon refresh)
     - cron: '0 5 * * *'
 
 permissions:
