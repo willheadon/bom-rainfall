@@ -1,37 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-print("START BOM TEST")
+print("START BOM RUN")
 
 url = "http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60169.html"
 
-# make request look like a real browser
 headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
 r = requests.get(url, headers=headers, timeout=30)
-
-print("HTTP status:", r.status_code)
-print("HTML size:", len(r.text))
+r.raise_for_status()
 
 soup = BeautifulSoup(r.text, "html.parser")
 
 tables = soup.find_all("table")
+print("Tables found:", len(tables))
 
-print("Total tables found:", len(tables))
-
-# keep your table 19 approach
 if len(tables) <= 19:
-    print("TABLE 19 NOT AVAILABLE")
-    exit()
-
-print("TABLE 19 EXISTS")
+    raise Exception("Table 19 not found")
 
 table = tables[19]
 
 rows = []
-
 for tr in table.find_all("tr"):
     cols = [td.get_text(strip=True) for td in tr.find_all("td")]
     if cols:
@@ -39,4 +31,13 @@ for tr in table.find_all("tr"):
 
 print("Rows extracted:", len(rows))
 
-print("END SUCCESS")
+df = pd.DataFrame(rows)
+
+# tidy for Power BI
+df = df.dropna(axis=1, how='all')
+
+output_file = "bom_rainfall.csv"
+df.to_csv(output_file, index=False)
+
+print("CSV WRITTEN:", output_file)
+print(df.head())
