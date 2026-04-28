@@ -1,7 +1,12 @@
-name: BOM Debug Run
+name: BOM Rainfall Update
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'   # daily (UTC)
+
+permissions:
+  contents: write
 
 jobs:
   run-script:
@@ -11,13 +16,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Show environment
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Files in repo:"
-          ls -R
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -26,5 +24,21 @@ jobs:
       - name: Install dependencies
         run: pip install requests beautifulsoup4 pandas
 
-      - name: Run script (verbose)
-        run: python -u bom.py
+      - name: Run BOM script
+        run: python bom.py
+
+      # lets you download the CSV from the run
+      - name: Upload CSV as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom-data
+          path: bom_rainfall.csv
+
+      # saves CSV into your repo
+      - name: Commit CSV to repo
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add bom_rainfall.csv
+          git commit -m "update BOM rainfall" || echo "No changes to commit"
+          git push
