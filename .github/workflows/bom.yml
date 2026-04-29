@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
   schedule:
    # ~4:00 AM NSW time (overnight refresh)
-    - cron: '0 16 * * *'
+    - cron: '0 18 * * *'
   # ~11:00 AM NSW time (morning refresh)
-    - cron: '0 0 * * *'
+    - cron: '0 1 * * *'
 
     # ~2:00 PM NSW time (midday stability refresh)
-    - cron: '0 3 * * *'
+    - cron: '0 4 * * *'
 
     # ~4:00 PM NSW time (afternoon refresh)
-    - cron: '0 5 * * *'
+    - cron: '0 6 * * *'
 
 permissions:
   contents: write
