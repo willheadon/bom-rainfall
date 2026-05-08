@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from datetime import datetime, timezone, timedelta
 
 print("START BOM RUN")
 
@@ -16,35 +17,59 @@ r.raise_for_status()
 soup = BeautifulSoup(r.text, "html.parser")
 
 tables = soup.find_all("table")
+
 print("Tables found:", len(tables))
 
 if len(tables) <= 19:
-    raise Exception("Table 19 not found")
+    raise Exception("Required tables not found")
 
-table = tables[19]
+# --- helper function ---
+def extract_rows(table):
+    rows = []
+    for tr in table.find_all("tr"):
+        cols = [td.get_text(strip=True) for td in tr.find_all("td")]
+        if cols:
+            rows.append(cols)
+    return rows
 
-rows = []
-for tr in table.find_all("tr"):
-    cols = [td.get_text(strip=True) for td in tr.find_all("td")]
-    if cols:
-        rows.append(cols)
+# --- extract tables ---
+table_williams = tables[19]
+table_patterson = tables[18]
 
-print("Rows extracted:", len(rows))
+rows_williams = extract_rows(table_williams)
+rows_patterson = extract_rows(table_patterson)
 
-df = pd.DataFrame(rows)
-from datetime import datetime, timezone, timedelta
+print("Williams rows:", len(rows_williams))
+print("Patterson rows:", len(rows_patterson))
 
-# NSW fixed time (ignore daylight savings as requested)
+# --- create dataframes ---
+df_williams = pd.DataFrame(rows_williams)
+df_patterson = pd.DataFrame(rows_patterson)
+
+# --- NSW fixed time (ignore daylight savings) ---
 nsw_offset = timezone(timedelta(hours=10))
-
 now_nsw = datetime.now(timezone.utc).astimezone(nsw_offset)
 
-df["LastUpdated_NSW"] = now_nsw.strftime("%Y-%m-%d %H:%M:%S")
-# tidy for Power BI
-df = df.dropna(axis=1, how='all')
+timestamp = now_nsw.strftime("%Y-%m-%d %H:%M:%S")
 
-output_file = "bom_rainfall.csv"
-df.to_csv(output_file, index=False)
+df_williams["LastUpdated_NSW"] = timestamp
+df_patterson["LastUpdated_NSW"] = timestamp
 
-print("CSV WRITTEN:", output_file)
-print(df.head())
+# --- tidy for Power BI ---
+df_williams = df_williams.dropna(axis=1, how='all')
+df_patterson = df_patterson.dropna(axis=1, how='all')
+
+# --- output files ---
+output_williams = "bom_rainfall_williams.csv"
+output_patterson = "bom_rainfall_patterson.csv"
+
+df_williams.to_csv(output_williams, index=False)
+df_patterson.to_csv(output_patterson, index=False)
+
+print("CSV WRITTEN:", output_williams)
+print(df_williams.head())
+
+print("CSV WRITTEN:", output_patterson)
+print(df_patterson.head())
+
+print("END SUCCESS")
