@@ -3,9 +3,10 @@ name: BOM Rainfall Update
 on:
   workflow_dispatch:
   schedule:
-      # ~4:00 AM NSW time (overnight refresh)
+    # ~4:00 AM NSW time (overnight refresh)
     - cron: '0 18 * * *'
-  # ~11:00 AM NSW time (morning refresh)
+
+    # ~11:00 AM NSW time (morning refresh)
     - cron: '0 1 * * *'
 
     # ~2:00 PM NSW time (midday stability refresh)
@@ -36,18 +37,21 @@ jobs:
       - name: Run BOM script
         run: python bom.py
 
-      # lets you download the CSV from the run
-      - name: Upload CSV as artifact
+      # lets you download the CSVs from the run
+      - name: Upload CSVs as artifact
         uses: actions/upload-artifact@v4
         with:
           name: bom-data
-          path: bom_rainfall.csv
+          path: |
+            bom_rainfall_williams.csv
+            bom_rainfall_patterson.csv
 
-      # saves CSV into your repo
-      - name: Commit CSV to repo
+      # saves CSVs into your repo
+      - name: Commit CSVs to repo
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add bom_rainfall.csv
+          git add bom_rainfall_williams.csv
+          git add bom_rainfall_patterson.csv
           git commit -m "update BOM rainfall" || echo "No changes to commit"
           git push
